@@ -2,8 +2,10 @@
 
 A creator marketplace where **brands** create campaigns with a milestone payout ladder and **creators** submit posts and track earnings. Payouts are based on the highest milestone a post has crossed and can never exceed the campaign budget.
 
-- **Live app:** `<add your Vercel URL here>`
-- **Live API:** `<add your Render URL here>/health`
+- **Live app (frontend, Vercel):** https://memed-campaign-tracker.vercel.app
+- **Live API (backend, Render):** https://memed-campaign-tracker-backend.onrender.com (health check: https://memed-campaign-tracker-backend.onrender.com/health)
+
+> The backend runs on Render's free tier, which sleeps when idle. The first request after a pause can take about a minute to respond.
 
 ## Stack
 - **Backend:** Node.js, TypeScript, Express, MongoDB (Mongoose), JWT auth, Jest
@@ -46,6 +48,12 @@ npm run dev                 # http://localhost:3000
 docker compose up --build   # mongo + backend :7000 + frontend :3000
 ```
 `NEXT_PUBLIC_API_URL` is baked into the frontend at **build** time (see `docker-compose.yml` build args).
+
+## Deployment
+- **Database:** MongoDB Atlas (Network Access allows `0.0.0.0/0` so Render can connect).
+- **Backend (Render):** Root Directory `backend`, Build `npm install --include=dev && npm run build`, Start `npm start`, Health Check Path `/health`. Environment: `MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL` (the Vercel URL, no trailing slash), `SPIKE_THRESHOLD`.
+- **Frontend (Vercel):** Root Directory `frontend`, environment variable `NEXT_PUBLIC_API_URL=https://memed-campaign-tracker-backend.onrender.com/api`. It is inlined at build time, so redeploy after changing it.
+- **CORS:** the backend allows `http://localhost:3000`, the Vercel URL above, and any origins listed in `CLIENT_URL`.
 
 ## Environment variables
 | Variable | Where | Description |
