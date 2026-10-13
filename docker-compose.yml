@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+  backend:
+    build: ./backend
+    ports:
+      - "7000:7000"
+    environment:
+      - PORT=7000
+      - MONGODB_URI=mongodb://mongo:27017/memed
+      - JWT_SECRET=change_me_in_real_deployments
+      - SPIKE_THRESHOLD=50000
+      - CLIENT_URL=http://localhost:3000
+    depends_on:
+      - mongo
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:7000/api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+volumes:
+  mongo-data:
