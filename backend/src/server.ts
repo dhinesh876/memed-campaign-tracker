@@ -5,8 +5,24 @@ import mongoose from 'mongoose';
 import { env } from './config/env';
 import { errorHandler } from './middleware/errorHandler';
 import apiRoutes from './routes/api';
+
 const app = express();
-app.use(cors(env.clientUrl ? { origin: env.clientUrl.split(',') } : undefined));
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://memed-campaign-tracker.vercel.app',
+  ...env.clientUrl.split(',').map(o => o.trim().replace(/\/$/, '')).filter(Boolean),
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      // No origin means a non-browser caller such as curl or Postman.
+      callback(null, !origin || allowedOrigins.includes(origin));
+    },
+  })
+);
+
 app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
